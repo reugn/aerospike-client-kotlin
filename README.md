@@ -1,4 +1,5 @@
 # aerospike-client-kotlin
+[![Build](https://github.com/reugn/aerospike-client-kotlin/actions/workflows/build.yml/badge.svg)](https://github.com/reugn/aerospike-client-kotlin/actions/workflows/build.yml)
 
 Aerospike Client for Kotlin wraps the Java client callback-based asynchronous methods and provides an idiomatic Kotlin API using coroutines and `Flow`.
 
