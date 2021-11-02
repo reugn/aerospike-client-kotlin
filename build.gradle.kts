@@ -2,13 +2,20 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
+    `maven-publish`
+    signing
 }
 
 group = "io.github.reugn"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 extra["aerospikeClientVersion"] = "5.1.8"
@@ -29,4 +36,61 @@ tasks.test {
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenCentral") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+            from(components["java"])
+            pom {
+                name.set(project.name)
+                description.set("Aerospike Client for Kotlin.")
+                url.set("https://github.com/reugn/aerospike-client-kotlin")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("reugn")
+                        name.set("reugn")
+                        email.set("reugpro@gmail.com")
+                        url.set("https://github.com/reugn")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/reugn/aerospike-client-kotlin.git")
+                    developerConnection.set("scm:git:ssh://github.com/reugn/aerospike-client-kotlin.git")
+                    url.set("https://github.com/reugn/aerospike-client-kotlin")
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenCentral"
+            credentials(PasswordCredentials::class)
+            val nexus = "https://s01.oss.sonatype.org/"
+            val releasesRepoUrl = uri(nexus + "service/local/staging/deploy/maven2")
+            val snapshotsRepoUrl = uri(nexus + "content/repositories/snapshots")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+        }
+    }
+}
+
+signing {
+    sign(publishing.publications["mavenCentral"])
+    useGpgCmd()
+    sign(configurations.archives.get())
+}
+
+tasks.javadoc {
+    if (JavaVersion.current().isJava9Compatible) {
+        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
+    }
 }
