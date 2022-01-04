@@ -11,7 +11,7 @@ import java.util.*
 
 interface IAerospikeAsyncClient : Closeable {
 
-    fun asJava(): AerospikeClient
+    fun asJava(): IAerospikeClient
 
     //-------------------------------------------------------
     // Write Record Operations
