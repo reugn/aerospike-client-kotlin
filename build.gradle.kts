@@ -1,13 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.6.0"
     `maven-publish`
     signing
 }
 
 group = "io.github.reugn"
-version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -18,13 +17,16 @@ java {
     withSourcesJar()
 }
 
-extra["aerospikeClientVersion"] = "5.1.8"
-extra["kotlinxCoroutinesVersion"] = "1.5.2"
-extra["nettyVersion"] = "4.1.69.Final"
+extra["aerospikeClientVersion"] = "5.1.11"
+extra["kotlinxCoroutinesVersion"] = "1.6.0"
+extra["nettyVersion"] = "4.1.72.Final"
 
 dependencies {
     implementation("com.aerospike:aerospike-client:${project.extra["aerospikeClientVersion"]}")
-    implementation("io.netty:netty-all:${project.extra["nettyVersion"]}")
+    implementation("io.netty:netty-transport:${project.extra["nettyVersion"]}")
+    implementation("io.netty:netty-transport-native-epoll:${project.extra["nettyVersion"]}")
+    implementation("io.netty:netty-transport-native-kqueue:${project.extra["nettyVersion"]}")
+    implementation("io.netty:netty-handler:${project.extra["nettyVersion"]}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${project.extra["kotlinxCoroutinesVersion"]}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${project.extra["kotlinxCoroutinesVersion"]}")
     testImplementation(kotlin("test"))
@@ -34,7 +36,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
