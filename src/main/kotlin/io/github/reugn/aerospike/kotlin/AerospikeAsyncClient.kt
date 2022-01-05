@@ -12,14 +12,14 @@ import kotlinx.coroutines.flow.Flow
 import java.util.*
 
 class AerospikeAsyncClient(
-    private val client: AerospikeClient,
+    private val client: IAerospikeClient,
     private val config: AsyncConfig
 ) : IAerospikeAsyncClient {
 
-    constructor(client: AerospikeClient) :
+    constructor(client: IAerospikeClient) :
             this(client, AsyncConfig.default)
 
-    override fun asJava(): AerospikeClient {
+    override fun asJava(): IAerospikeClient {
         return client
     }
 
