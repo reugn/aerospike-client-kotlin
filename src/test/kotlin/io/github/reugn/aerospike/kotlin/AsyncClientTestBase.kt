@@ -15,7 +15,7 @@ open class AsyncClientTestBase {
     protected val asyncClient: IAerospikeAsyncClient
 
     protected val namespace = "test"
-    protected val set = "client"
+    protected val set = "kotlinClient"
 
     protected val intBin = "intBin"
     protected val strBin = "strBin"
@@ -46,10 +46,8 @@ open class AsyncClientTestBase {
     }
 
     protected fun deleteKeys() {
-        for (i in 0 until keysSize) {
-            runBlocking {
-                asyncClient.delete(null, keys[i])
-            }
+        runBlocking {
+            asyncClient.deleteBatch(null, null, keys)
         }
     }
 }

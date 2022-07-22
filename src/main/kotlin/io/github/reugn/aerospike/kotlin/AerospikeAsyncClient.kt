@@ -1,13 +1,19 @@
 package io.github.reugn.aerospike.kotlin
 
-import com.aerospike.client.*
+import com.aerospike.client.BatchRecord
+import com.aerospike.client.BatchResults
+import com.aerospike.client.Bin
+import com.aerospike.client.IAerospikeClient
+import com.aerospike.client.Key
+import com.aerospike.client.Operation
+import com.aerospike.client.Record
 import com.aerospike.client.cluster.Node
 import com.aerospike.client.policy.*
 import com.aerospike.client.query.KeyRecord
-import com.aerospike.client.query.PartitionFilter
 import io.github.reugn.aerospike.kotlin.callback.RecordScanCallback
 import io.github.reugn.aerospike.kotlin.config.AsyncConfig
 import io.github.reugn.aerospike.kotlin.listener.*
+import io.github.reugn.aerospike.kotlin.model.QueryStatement
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -53,8 +59,20 @@ class AerospikeAsyncClient(
         return listener.await() ?: false
     }
 
-    override suspend fun truncate(
-        policy: InfoPolicy?, ns: String, set: String,
+    override suspend fun deleteBatch(
+        policy: BatchPolicy?,
+        batchDeletePolicy: BatchDeletePolicy?,
+        keys: Collection<Key>
+    ): BatchResults {
+        val listener = KotlinBatchRecordArrayListener()
+        client.delete(null, listener, policy, batchDeletePolicy, keys.toTypedArray())
+        return listener.await()!!
+    }
+
+    override fun truncate(
+        policy: InfoPolicy?,
+        ns: String,
+        set: String,
         beforeLastUpdate: Calendar?
     ) {
         return client.truncate(policy, ns, set, beforeLastUpdate)
@@ -72,7 +90,7 @@ class AerospikeAsyncClient(
         return listener.await() ?: false
     }
 
-    override suspend fun existsBatch(policy: BatchPolicy?, keys: List<Key>): List<Boolean> {
+    override suspend fun existsBatch(policy: BatchPolicy?, keys: Collection<Key>): List<Boolean> {
         val listener = KotlinExistsArrayListener()
         client.exists(null, listener, policy, keys.toTypedArray())
         return listener.await()!!
@@ -88,14 +106,9 @@ class AerospikeAsyncClient(
         return listener.await()
     }
 
-    override suspend fun getHeader(policy: Policy?, key: Key): Record? {
-        val listener = KotlinRecordListener()
-        client.getHeader(null, listener, policy, key)
-        return listener.await()
-    }
-
     override suspend fun getBatch(
-        policy: BatchPolicy?, keys: List<Key>,
+        policy: BatchPolicy?,
+        keys: Collection<Key>,
         vararg binNames: String
     ): List<Record> {
         val listener = KotlinRecordArrayListener()
@@ -107,19 +120,53 @@ class AerospikeAsyncClient(
         return listener.await()!!
     }
 
-    override suspend fun getHeaderBatch(policy: BatchPolicy?, keys: List<Key>): List<Record> {
+    override suspend fun getBatchOp(
+        policy: BatchPolicy?,
+        keys: Collection<Key>,
+        vararg operations: Operation
+    ): List<Record> {
+        val listener = KotlinRecordArrayListener()
+        client.get(null, listener, policy, keys.toTypedArray(), *operations)
+        return listener.await()!!
+    }
+
+    override suspend fun getHeader(policy: Policy?, key: Key): Record? {
+        val listener = KotlinRecordListener()
+        client.getHeader(null, listener, policy, key)
+        return listener.await()
+    }
+
+    override suspend fun getHeaderBatch(policy: BatchPolicy?, keys: Collection<Key>): List<Record> {
         val listener = KotlinRecordArrayListener()
         client.getHeader(null, listener, policy, keys.toTypedArray())
         return listener.await()!!
     }
 
     override suspend fun operate(
-        policy: WritePolicy?, key: Key,
+        policy: WritePolicy?,
+        key: Key,
         vararg operations: Operation
     ): Record? {
         val listener = KotlinRecordListener()
         client.operate(null, listener, policy, key, *operations)
         return listener.await()
+    }
+
+    override suspend fun operateBatch(
+        policy: BatchPolicy?,
+        batchWritePolicy: BatchWritePolicy?,
+        keys: Collection<Key>,
+        vararg operations: Operation
+    ): BatchResults {
+        val listener = KotlinBatchRecordArrayListener()
+        client.operate(null, listener, policy, batchWritePolicy, keys.toTypedArray(), *operations)
+        return listener.await()!!
+    }
+
+    override suspend fun operateBatchRecord(policy: BatchPolicy?, records: Collection<BatchRecord>): Boolean {
+        val listener = KotlinBatchOperateListListener()
+        client.operate(null, listener, policy, records.toList())
+        return listener.await()!!
     }
 
     override suspend fun scanNodeName(
@@ -146,26 +193,13 @@ class AerospikeAsyncClient(
         return callback.getRecordSet()
     }
 
-    override suspend fun scanAll(
-        policy: ScanPolicy?,
-        ns: String,
-        set: String,
-        vararg binNames: String
-    ): Flow<KeyRecord> {
-        val listener = ScanRecordSequenceListener(config)
-        client.scanAll(null, listener, policy, ns, set, *binNames)
-        return listener.consumeAsFlow()
-    }
-
-    override suspend fun scanPartitions(
-        policy: ScanPolicy?,
-        filter: PartitionFilter,
-        ns: String,
-        set: String,
-        vararg binNames: String
-    ): Flow<KeyRecord> {
-        val listener = ScanRecordSequenceListener(config)
-        client.scanPartitions(null, listener, policy, filter, ns, set, *binNames)
+    override fun query(policy: QueryPolicy?, statement: QueryStatement): Flow<KeyRecord> {
+        val listener = KotlinRecordSequenceListener(config)
+        statement.partitionFilter?.let {
+            client.queryPartitions(null, listener, policy, statement.statement, it)
+        } ?: run {
+            client.query(null, listener, policy, statement.statement)
+        }
         return listener.consumeAsFlow()
     }
 
