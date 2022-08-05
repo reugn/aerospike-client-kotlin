@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.runBlocking
 
-class ScanRecordSequenceListener(config: AsyncConfig) : RecordSequenceListener {
+class KotlinRecordSequenceListener(config: AsyncConfig) : RecordSequenceListener {
 
     private val channel: Channel<KeyRecord> = Channel(capacity = config.channelCapacity)
 

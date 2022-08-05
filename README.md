@@ -33,8 +33,9 @@ fun `Perform operations on a key`(): Unit = runBlocking {
 }
 
 @Test
-fun `Scan partitions`(): Unit = runBlocking {
-    val flow = asyncClient.scanPartitions(null, PartitionFilter.all(), namespace, set)
+fun `Query all`(): Unit = runBlocking {
+    val queryStatement = QueryStatement(namespace, setName = set)
+    val flow = asyncClient.query(null, queryStatement)
     val recordsNumber = flow.toList().size
     assertEquals(keysSize, recordsNumber)
 }

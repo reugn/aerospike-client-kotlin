@@ -1,10 +1,16 @@
 package io.github.reugn.aerospike.kotlin
 
-import com.aerospike.client.*
+import com.aerospike.client.BatchRecord
+import com.aerospike.client.BatchResults
+import com.aerospike.client.Bin
+import com.aerospike.client.IAerospikeClient
+import com.aerospike.client.Key
+import com.aerospike.client.Operation
+import com.aerospike.client.Record
 import com.aerospike.client.cluster.Node
 import com.aerospike.client.policy.*
 import com.aerospike.client.query.KeyRecord
-import com.aerospike.client.query.PartitionFilter
+import io.github.reugn.aerospike.kotlin.model.QueryStatement
 import kotlinx.coroutines.flow.Flow
 import java.io.Closeable
 import java.util.*
@@ -39,7 +45,12 @@ interface IAerospikeAsyncClient : Closeable {
 
     suspend fun delete(policy: WritePolicy?, key: Key): Boolean
 
-    suspend fun truncate(
+    suspend fun deleteBatch(
+        policy: BatchPolicy?, batchDeletePolicy: BatchDeletePolicy?,
+        keys: Collection<Key>
+    ): BatchResults
+
+    fun truncate(
         policy: InfoPolicy?, ns: String, set: String,
         beforeLastUpdate: Calendar? = null
     )
@@ -56,7 +67,7 @@ interface IAerospikeAsyncClient : Closeable {
 
     suspend fun exists(policy: Policy?, key: Key): Boolean
 
-    suspend fun existsBatch(policy: BatchPolicy?, keys: List<Key>): List<Boolean>
+    suspend fun existsBatch(policy: BatchPolicy?, keys: Collection<Key>): List<Boolean>
 
     //-------------------------------------------------------
     // Read Record Operations
@@ -64,18 +75,16 @@ interface IAerospikeAsyncClient : Closeable {
 
     suspend fun get(policy: Policy?, key: Key, vararg binNames: String): Record?
 
-    suspend fun getHeader(policy: Policy?, key: Key): Record?
+    suspend fun getBatch(policy: BatchPolicy?, keys: Collection<Key>, vararg binNames: String): List<Record>
 
-    //-------------------------------------------------------
-    // Batch Read Operations
-    //-------------------------------------------------------
-
-    suspend fun getBatch(
-        policy: BatchPolicy?, keys: List<Key>,
-        vararg binNames: String
+    suspend fun getBatchOp(
+        policy: BatchPolicy?, keys: Collection<Key>,
+        vararg operations: Operation
     ): List<Record>
 
-    suspend fun getHeaderBatch(policy: BatchPolicy?, keys: List<Key>): List<Record>
+    suspend fun getHeader(policy: Policy?, key: Key): Record?
+
+    suspend fun getHeaderBatch(policy: BatchPolicy?, keys: Collection<Key>): List<Record>
 
     //-------------------------------------------------------
     // Generic Database Operations
@@ -83,8 +92,15 @@ interface IAerospikeAsyncClient : Closeable {
 
     suspend fun operate(policy: WritePolicy?, key: Key, vararg operations: Operation): Record?
 
+    suspend fun operateBatch(
+        policy: BatchPolicy?, batchWritePolicy: BatchWritePolicy?,
+        keys: Collection<Key>, vararg operations: Operation
+    ): BatchResults
+
+    suspend fun operateBatchRecord(policy: BatchPolicy?, records: Collection<BatchRecord>): Boolean
+
     //-------------------------------------------------------
-    // Scan Operations
+    // Scan/Query Operations
     //-------------------------------------------------------
 
     suspend fun scanNodeName(
@@ -97,13 +113,5 @@ interface IAerospikeAsyncClient : Closeable {
         vararg binNames: String
     ): List<KeyRecord>
 
-    suspend fun scanAll(
-        policy: ScanPolicy?, ns: String, set: String,
-        vararg binNames: String
-    ): Flow<KeyRecord>
-
-    suspend fun scanPartitions(
-        policy: ScanPolicy?, filter: PartitionFilter,
-        ns: String, set: String, vararg binNames: String
-    ): Flow<KeyRecord>
+    fun query(policy: QueryPolicy?, statement: QueryStatement): Flow<KeyRecord>
 }

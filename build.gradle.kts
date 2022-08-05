@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "1.7.10"
     `maven-publish`
     signing
 }
@@ -17,9 +17,9 @@ java {
     withSourcesJar()
 }
 
-extra["aerospikeClientVersion"] = "5.1.11"
-extra["kotlinxCoroutinesVersion"] = "1.6.0"
-extra["nettyVersion"] = "4.1.72.Final"
+extra["aerospikeClientVersion"] = "6.1.0"
+extra["kotlinxCoroutinesVersion"] = "1.6.4"
+extra["nettyVersion"] = "4.1.79.Final"
 
 dependencies {
     implementation("com.aerospike:aerospike-client:${project.extra["aerospikeClientVersion"]}")
