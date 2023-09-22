@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.9.10"
     `maven-publish`
     signing
 }
@@ -17,9 +17,9 @@ java {
     withSourcesJar()
 }
 
-extra["aerospikeClientVersion"] = "6.1.0"
-extra["kotlinxCoroutinesVersion"] = "1.6.4"
-extra["nettyVersion"] = "4.1.79.Final"
+extra["aerospikeClientVersion"] = "7.1.0"
+extra["kotlinxCoroutinesVersion"] = "1.7.3"
+extra["nettyVersion"] = "4.1.97.Final"
 
 dependencies {
     implementation("com.aerospike:aerospike-client:${project.extra["aerospikeClientVersion"]}")
@@ -38,6 +38,11 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 }
 
 publishing {
