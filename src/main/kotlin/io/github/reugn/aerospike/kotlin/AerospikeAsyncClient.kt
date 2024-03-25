@@ -203,6 +203,16 @@ class AerospikeAsyncClient(
         return listener.consumeAsFlow()
     }
 
+    override suspend fun info(
+        policy: InfoPolicy?,
+        node: Node?,
+        vararg commands: String
+    ): Map<String, String> {
+        val infoListener = KotlinInfoListener()
+        client.info(null, infoListener, policy, node, *commands)
+        return infoListener.await()!!
+    }
+
     override fun close() {
         client.close()
     }

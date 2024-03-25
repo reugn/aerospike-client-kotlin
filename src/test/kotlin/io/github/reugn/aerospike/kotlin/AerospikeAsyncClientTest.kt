@@ -84,6 +84,7 @@ class AerospikeAsyncClientTest : AsyncClientTestBase() {
         assertNull(record)
     }
 
+    @Suppress("UselessCallOnCollection")
     @Test
     fun `Delete batch of records`(): Unit = runBlocking {
         asyncClient.deleteBatch(null, null, keys)
@@ -126,6 +127,7 @@ class AerospikeAsyncClientTest : AsyncClientTestBase() {
         }
     }
 
+    @Suppress("UselessCallOnCollection")
     @Test
     fun `Operate list of BatchRecords`(): Unit = runBlocking {
         val records = listOf(
@@ -152,5 +154,18 @@ class AerospikeAsyncClientTest : AsyncClientTestBase() {
         val flow = asyncClient.query(null, queryStatement)
         val recordsNumber = flow.toList().size
         assertEquals(keysSize, recordsNumber)
+    }
+
+    @Test
+    fun `Info sets`(): Unit = runBlocking {
+        val resultMap = asyncClient.info(null, null, "namespaces")
+        assertTrue(resultMap.values.contains(namespace))
+    }
+
+    @Test
+    fun `Info two commands`(): Unit = runBlocking {
+        val resultMap = asyncClient.info(null, null, "namespaces", "version")
+        assertTrue(resultMap.values.contains(namespace))
+        assertTrue(resultMap.values.any { it.contains("Aerospike") })
     }
 }
