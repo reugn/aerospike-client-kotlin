@@ -114,4 +114,14 @@ interface IAerospikeAsyncClient : Closeable {
     ): List<KeyRecord>
 
     fun query(policy: QueryPolicy?, statement: QueryStatement): Flow<KeyRecord>
+
+    //-----------------------------------------------------------------
+    // Async Info functions
+    //-----------------------------------------------------------------
+
+    suspend fun info(
+        policy: InfoPolicy?,
+        node: Node?,
+        vararg commands: String
+    ): Map<String, String>
 }
