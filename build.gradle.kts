@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "2.1.0"
     `maven-publish`
     signing
 }
@@ -17,12 +17,12 @@ java {
     withSourcesJar()
 }
 
-extra["aerospikeClientVersion"] = "7.1.0"
+extra["aerospikeClientVersion"] = "9.0.2"
 extra["kotlinxCoroutinesVersion"] = "1.7.3"
 extra["nettyVersion"] = "4.1.97.Final"
 
 dependencies {
-    implementation("com.aerospike:aerospike-client:${project.extra["aerospikeClientVersion"]}")
+    implementation("com.aerospike:aerospike-client-jdk8:${project.extra["aerospikeClientVersion"]}")
     implementation("io.netty:netty-transport:${project.extra["nettyVersion"]}")
     implementation("io.netty:netty-transport-native-epoll:${project.extra["nettyVersion"]}")
     implementation("io.netty:netty-transport-native-kqueue:${project.extra["nettyVersion"]}")

@@ -1,12 +1,6 @@
 package io.github.reugn.aerospike.kotlin
 
-import com.aerospike.client.BatchRecord
-import com.aerospike.client.BatchResults
-import com.aerospike.client.Bin
-import com.aerospike.client.IAerospikeClient
-import com.aerospike.client.Key
-import com.aerospike.client.Operation
-import com.aerospike.client.Record
+import com.aerospike.client.*
 import com.aerospike.client.cluster.Node
 import com.aerospike.client.policy.*
 import com.aerospike.client.query.KeyRecord
@@ -98,6 +92,14 @@ interface IAerospikeAsyncClient : Closeable {
     ): BatchResults
 
     suspend fun operateBatchRecord(policy: BatchPolicy?, records: Collection<BatchRecord>): Boolean
+
+    //-------------------------------------------------------
+    // Multi-Record Transactions
+    //-------------------------------------------------------
+
+    suspend fun commit(txn: Txn): CommitStatus
+
+    suspend fun abort(txn: Txn): AbortStatus
 
     //-------------------------------------------------------
     // Scan/Query Operations
