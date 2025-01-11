@@ -1,12 +1,6 @@
 package io.github.reugn.aerospike.kotlin
 
-import com.aerospike.client.BatchRecord
-import com.aerospike.client.BatchResults
-import com.aerospike.client.Bin
-import com.aerospike.client.IAerospikeClient
-import com.aerospike.client.Key
-import com.aerospike.client.Operation
-import com.aerospike.client.Record
+import com.aerospike.client.*
 import com.aerospike.client.cluster.Node
 import com.aerospike.client.policy.*
 import com.aerospike.client.query.KeyRecord
@@ -96,6 +90,7 @@ class AerospikeAsyncClient(
         return listener.await()!!
     }
 
+    @Suppress("kotlin:S6518")
     override suspend fun get(policy: Policy?, key: Key, vararg binNames: String): Record? {
         val listener = KotlinRecordListener()
         if (binNames.isNotEmpty()) {
@@ -166,6 +161,18 @@ class AerospikeAsyncClient(
     override suspend fun operateBatchRecord(policy: BatchPolicy?, records: Collection<BatchRecord>): Boolean {
         val listener = KotlinBatchOperateListListener()
         client.operate(null, listener, policy, records.toList())
+        return listener.await()!!
+    }
+
+    override suspend fun commit(txn: Txn): CommitStatus {
+        val listener = KotlinCommitListener()
+        client.commit(null, listener, txn)
+        return listener.await()!!
+    }
+
+    override suspend fun abort(txn: Txn): AbortStatus {
+        val listener = KotlinAbortListener()
+        client.abort(null, listener, txn)
         return listener.await()!!
     }
 
