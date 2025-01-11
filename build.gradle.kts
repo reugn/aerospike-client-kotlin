@@ -1,4 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
     kotlin("jvm") version "2.1.0"
@@ -18,8 +19,8 @@ java {
 }
 
 extra["aerospikeClientVersion"] = "9.0.2"
-extra["kotlinxCoroutinesVersion"] = "1.7.3"
-extra["nettyVersion"] = "4.1.97.Final"
+extra["kotlinxCoroutinesVersion"] = "1.10.1"
+extra["nettyVersion"] = "4.1.116.Final"
 
 dependencies {
     implementation("com.aerospike:aerospike-client-jdk8:${project.extra["aerospikeClientVersion"]}")
@@ -36,8 +37,10 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+tasks.withType<KotlinJvmCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
 }
 
 tasks.withType<JavaCompile> {
